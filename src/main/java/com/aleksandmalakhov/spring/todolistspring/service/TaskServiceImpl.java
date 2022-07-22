@@ -14,27 +14,27 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class TaskServiceImpl implements TaskService<Task, SubTask> {
-    private final TaskRepository taskRepository;
+    private final TaskRepository repository;
 
     @Override
     public boolean save(@NonNull Task task) {
         if (task.getHeading().isBlank() || task.getDescription().isBlank() || task.getDate() == null) {
             return false;
         } else {
-            taskRepository.save(task);
+            repository.save(task);
             return true;
         }
     }
 
     @Override
     public Optional<SubTask> findById(int id) {
-        Optional<Task> task = taskRepository.findById(id);
+        Optional<Task> task = repository.findById(id);
         return task.map(SubTask::new);
     }
 
     @Override
     public List<SubTask> findAll() {
-        List<Task> list = taskRepository.findAll();
+        List<Task> list = repository.findAll();
         return !list.isEmpty() ?
                 list.stream()
                         .map(SubTask::new)
@@ -45,7 +45,7 @@ public class TaskServiceImpl implements TaskService<Task, SubTask> {
     @Override
     public boolean deleteById(int id) {
         if (this.findById(id).isPresent()) {
-            taskRepository.deleteById(id);
+            repository.deleteById(id);
             return true;
         } else {
             return false;
@@ -57,7 +57,7 @@ public class TaskServiceImpl implements TaskService<Task, SubTask> {
         if (this.findAll().isEmpty()) {
             return false;
         } else {
-            taskRepository.deleteAll();
+            repository.deleteAll();
             return true;
         }
     }

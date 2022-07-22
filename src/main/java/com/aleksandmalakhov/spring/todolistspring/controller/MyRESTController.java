@@ -15,25 +15,25 @@ import java.util.stream.Collectors;
 @RestController
 @CrossOrigin
 public class MyRESTController {
-    private final TaskService<Task, SubTask> taskService;
+    private final TaskService<Task, SubTask> service;
 
     @PostMapping("/tasks")
     public ResponseEntity<Task> addNewTask(@RequestBody Task task) {
-        return taskService.save(task) ?
+        return service.save(task) ?
                 ResponseEntity.ok(task) :
                 ResponseEntity.of(Optional.empty());
     }
 
     @PutMapping("/tasks")
     public ResponseEntity<Task> updateTask(@RequestBody Task task) {
-        return taskService.save(task) ?
+        return service.save(task) ?
                 ResponseEntity.ok(task) :
                 ResponseEntity.of(Optional.empty());
     }
 
     @GetMapping("/tasks")
     public ResponseEntity<List<SubTask>> showAllTasks() {
-        List<?> subTasks = taskService.findAll();
+        List<?> subTasks = service.findAll();
         return subTasks.isEmpty() ?
                 ResponseEntity.notFound().build() :
                 ResponseEntity.ok(subTasks.stream()
@@ -43,14 +43,14 @@ public class MyRESTController {
 
     @GetMapping("/tasks/{id}")
     public ResponseEntity<SubTask> getTask(@PathVariable int id) {
-        Optional<?> subTask = taskService.findById(id);
+        Optional<?> subTask = service.findById(id);
         return subTask.map(o -> ResponseEntity.ok((SubTask) o))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/tasks/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable int id) {
-        return taskService.deleteById(id) ?
+        return service.deleteById(id) ?
                 ResponseEntity.ok().build() :
                 ResponseEntity.notFound().build();
 
@@ -58,7 +58,7 @@ public class MyRESTController {
 
     @DeleteMapping("/tasks")
     public ResponseEntity<String> deleteAllTasks() {
-        return taskService.deleteAll() ?
+        return service.deleteAll() ?
                 ResponseEntity.ok("Success!") :
                 ResponseEntity.unprocessableEntity().body("No data found");
     }
