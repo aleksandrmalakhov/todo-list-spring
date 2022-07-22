@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+
+        input:focus {
+            background: #eaeaea;
+        }
+
+        .d1 {
+            background: red;
+            color: black;
+        }
+
+        .c1 {
+            background: green;
+            color: white;
+        }
+
+        .s1 {
+            background: cornflowerblue;
+            color: whitesmoke;
+        }
+
+        .b1 {
+            position: fixed;
+            right: 10px;
+        }
+    </style>
+    <title>ToDo List</title>
+</head>
+<body>
+
+<h2>ToDo Table</h2>
+
+<button class="d1" onclick="deleteAllTasks();location.reload()">Delete All Tasks</button>
+
+<a class="b1">
+    <input id="search_field" type="number" placeholder="Search id" autofocus>
+    <button class="s1" id="search_button" onclick="searchById()">Search by Id</button>
+</a>
+<br><br>
+
+<table id="todoList"></table>
+<br>
+
+<form>
+    <input id="task_heading" type="text" placeholder="Task heading">
+    <input id="task_description" type="text" placeholder="Task description">
+    <input id="task_year" type="date" placeholder="dd.mm.yyyy">
+    <button class="c1" onclick="createTask();form.reset();location.reload();loadTasks()">Create task</button>
+</form>
+
+<script>
+    function searchById() {
+        const id = document.getElementById("search_field").value;
+        const xmlHttp = new XMLHttpRequest();
+
+        xmlHttp.onreadystatechange = function () {
+            if (this.readyState === 4 && this.status === 200) {
+                const task = JSON.parse(this.responseText);
+                let html = '<tr>\n' +
+                    '        <th>Task id</th>\n' +
+                    '        <th>Task heading</th>\n' +
+                    '        <th>Task description</th>\n' +
+                    '        <th>Task date</th>\n' +
+                    '        <th>Options</th>\n' +
+                    '    </tr>';
+                html = html + '<tr><td>' + task.id + '</td>\n' +
+                    '        <td>' + task.heading + '</td>\n' +
+                    '        <td>' + task.description + '</td>\n' +
+                    '        <td>' + task.date + '</td>' +
+                    '        <td><button class="d1" onclick="deleteTask(' + task.id + ');' +
+                    ' location.reload(); loadTasks()">Delete</button></td></tr>';
+                document.getElementById("todoList").innerHTML = html;
+            }
+        };
+        xmlHttp.open("GET", "http://localhost:8080/tasks/" + id, true);
+        xmlHttp.send();
+
+        document.getElementById("search_field").value = "";
+    }
+
+    function deleteTask(taskId) {
+        const xmlHttp = new XMLHttpRequest();
+
+        xmlHttp.open("DELETE", "http://localhost:8080/tasks/" + taskId, true);
+        xmlHttp.send();
+    }
+
+    function deleteAllTasks() {
+        const xmlHttp = new XMLHttpRequest();
+
+        xmlHttp.open("DELETE", "http://localhost:8080/tasks", true);
+        xmlHttp.send();
+    }
+
+    function createTask() {
+        const taskHeading = document.getElementById("task_heading").value;
+        const taskDescription = document.getElementById("task_description").value;
+        const taskYear = document.getElementById("task_year").value;
+        const xmlHttp = new XMLHttpRequest();
+
+        xmlHttp.open("POST", "http://localhost:8080/tasks");
+        xmlHttp.setRequestHeader("Content-Type", "application/json");
+        xmlHttp.send(JSON.stringify({heading: taskHeading, description: taskDescription, date: taskYear}));
+    }
+
+    function loadTasks() {
+        const xmlHttp = new XMLHttpRequest();
+
+        xmlHttp.onreadystatechange = function () {
+            if (this.readyState === 4 && this.status === 200) {
+                const tasks = JSON.parse(this.responseText);
+                let html = '<tr>\n' +
+                    '        <th>Task id</th>\n' +
+                    '        <th>Task heading</th>\n' +
+                    '        <th>Task description</th>\n' +
+                    '        <th>Task date</th>\n' +
+                    '        <th>Options</th>\n' +
+                    '    </tr>';
+                for (let i = 0; i < tasks.length; i++) {
+                    const task = tasks[i];
+                    html = html + '<tr><td>' + task.id + '</td>\n' +
+                        '        <td>' + task.heading + '</td>\n' +
+                        '        <td>' + task.description + '</td>\n' +
+                        '        <td>' + task.date + '</td>' +
+                        '        <td>' +
+                        '<button class="d1" onclick="deleteTask(' + task.id + '); location.reload(); loadTasks()">Delete</button>' +
+                        '</td></tr>';
+                }
+                document.getElementById("todoList").innerHTML = html;
+            }
+        };
+        xmlHttp.open("GET", "http://localhost:8080/tasks", true);
+        xmlHttp.send();
+    }
+
+    loadTasks();
+
+</script>
+</body>
+</html>
